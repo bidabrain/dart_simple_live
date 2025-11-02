@@ -1,4 +1,4 @@
-name: Build Android
+name: Build Windows
 
 on:
   push:
@@ -6,34 +6,38 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-android:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: simple_live_app
     
     steps:
       - uses: actions/checkout@v4
-      
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-          
+        
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
           
-      - name: 修复依赖并构建
-        run: |
+      - run: flutter config --enable-windows-desktop
+        
+      - run: |
           flutter clean
-          flutter pub add intl:^0.20.2  # ← 关键！自动升级 intl
+          flutter pub add intl:^0.20.2
           flutter pub get
-          flutter build apk --release --split-per-abi
+        
+      - run: flutter build windows --release
+        
+      - name: 打包
+        shell: pwsh
+        run: |
+          cd build/windows/x64/runner/Release
+          Compress-Archive -Path * -DestinationPath ../../../../../dart-simple-live-windows.zip -Force
         
       - uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: simple_live_app/build/app/outputs/flutter-apk/*.apk
+          name: windows-x64
+          path: simple_live_app/dart-simple-live-windows.zip
