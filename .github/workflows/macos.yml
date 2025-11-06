@@ -24,6 +24,14 @@ jobs:
           
       - run: flutter config --enable-macos-desktop
         
+      - name: 更新 macOS 部署目标
+        run: |
+          # Update Podfile
+          sed -i '' 's/platform :osx, .*/platform :osx, '\''10.15'\''/' macos/Podfile
+          
+          # Update project.pbxproj
+          sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = 10\.[0-9][0-9]*;/MACOSX_DEPLOYMENT_TARGET = 10.15;/g' macos/Runner.xcodeproj/project.pbxproj
+        
       - run: |
           flutter clean
           flutter pub get
