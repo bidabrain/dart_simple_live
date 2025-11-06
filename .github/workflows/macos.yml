@@ -26,7 +26,6 @@ jobs:
         
       - run: |
           flutter clean
-          flutter pub add intl:^0.20.2
           flutter pub get
         
       - run: flutter build macos --release
